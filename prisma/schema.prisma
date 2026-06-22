@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Carrera {
+  id       Int       @id @default(autoincrement())
+  nombre   String    @unique
+  materias Materia[]
+  ciclos   Ciclo[]
+}
+
+model Materia {
+  id                Int               @id @default(autoincrement())
+  nombre            String
+  carreraId         Int
+  carrera           Carrera           @relation(fields: [carreraId], references: [id], onDelete: Cascade)
+  asignacionLugares AsignacionLugar[]
+}
+
+model Ciclo {
+  id                Int               @id @default(autoincrement())
+  nombre            String
+  estado            String            @default("activo")
+  carreraId         Int
+  carrera           Carrera           @relation(fields: [carreraId], references: [id], onDelete: Cascade)
+  matriculas        Matricula[]
+  asignacionLugares AsignacionLugar[]
+}
+
+model Estudiante {
+  id         Int         @id @default(autoincrement())
+  nombre     String
+  email      String?     @unique
+  matriculas Matricula[]
+}
+
+model Matricula {
+  id           Int        @id @default(autoincrement())
+  estudianteId Int
+  cicloId      Int
+  estado       String     @default("activa")
+  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  ciclo        Ciclo      @relation(fields: [cicloId], references: [id], onDelete: Cascade)
+}
+
+model Lugar {
+  id                Int               @id @default(autoincrement())
+  nombre            String
+  tipo              String
+  asignacionLugares AsignacionLugar[]
+}
+
+model AsignacionLugar {
+  id        Int     @id @default(autoincrement())
+  lugarId   Int
+  cicloId   Int
+  materiaId Int
+  lugar     Lugar   @relation(fields: [lugarId], references: [id], onDelete: Cascade)
+  ciclo     Ciclo   @relation(fields: [cicloId], references: [id], onDelete: Cascade)
+  materia   Materia @relation(fields: [materiaId], references: [id], onDelete: Cascade)
+}

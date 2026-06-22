@@ -1,0 +1,71 @@
+=======================================================
+   GUÍA PASO A PASO PARA PROBAR LA API (DÍA DE ENTREGA)
+=======================================================
+
+Esta guía te ayudará a demostrar el funcionamiento del backend 
+sin tener errores en la presentación.
+
+PASO 1: PREPARAR EL ENTORNO
+-------------------------------------------------------
+1. Asegúrate de tener encendido tu servidor de PostgreSQL (y pgAdmin abierto si necesitas mostrar la base de datos).
+2. Abre la terminal en la carpeta del proyecto ("sist universidad").
+3. Ejecuta el comando para levantar el servidor:
+   node index.js
+4. Verás el mensaje: "Servidor de la API corriendo en http://localhost:3000".
+
+PASO 2: PROBAR LA PETICIÓN 1 (Crear Carrera y Materias)
+-------------------------------------------------------
+Abre Postman (o Thunder Client).
+- Método: POST
+- URL: http://localhost:3000/api/peticion1
+- Body (RAW -> JSON):
+{
+  "carrera": "Ingenieria de Software 2026",
+  "materias": "Programacion 1, Programacion 2, Base de Datos"
+}
+
+* IMPORTANTE: Si ya habías guardado "Ingenieria de Software 2026" antes, cámbiale el nombre ligeramente para evitar el error de "registro duplicado" (ej: "Ingenieria de Software 2027").
+* En la respuesta verás un ID generado para la carrera (ej. "id": 1). Anótalo mentalmente para el paso 3.
+
+PASO 3: PROBAR LA PETICIÓN 2 (Crear Ciclo Validando)
+-------------------------------------------------------
+Abre una nueva pestaña en Postman.
+- Método: POST
+- URL: http://localhost:3000/api/peticion2
+- Body (RAW -> JSON):
+{
+  "Ciclo": "Ciclo 2026-2027",
+  "status": "activo",
+  "carreraId": 1,
+  "carrera": "existe",
+  "estudiantes": "existen",
+  "matriculas": "activas"
+}
+
+* NOTA: Reemplaza "carreraId": 1 por el ID real que te devolvió el PASO 2.
+* Esto validará que todo cumpla con los textos de tu rúbrica ("existe", "existen", "activas") y devolverá un nuevo ID de Ciclo.
+
+PASO 4: PROBAR LA PETICIÓN 3 (Asignar Laboratorio)
+-------------------------------------------------------
+Abre una nueva pestaña en Postman.
+- Método: POST
+- URL: http://localhost:3000/api/peticion3
+- Body (RAW -> JSON):
+{
+  "Aulas": "Crear",
+  "laboratorio": "asignar",
+  "ciclo": "existe y acvtivo",
+  "mariculas": "existe y activa",
+  "materia": "existe",
+  "nombreLugar": "Laboratorio Principal",
+  "cicloId": 1,
+  "materiaId": 1
+}
+
+* NOTA:
+ - "cicloId": Pon el ID del ciclo que te dio la respuesta del PASO 3.
+ - "materiaId": Pon el ID de alguna de las materias que te devolvió el PASO 2.
+* Si todo está correcto, el sistema validará que el ciclo esté activo, que tenga matrículas activas y que la materia exista, y creará exitosamente tu Laboratorio.
+
+=======================================================
+¡Éxito en tu presentación!
