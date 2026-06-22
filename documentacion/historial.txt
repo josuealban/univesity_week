@@ -1,0 +1,60 @@
+=======================================================
+               HISTORIAL DE DESARROLLO
+=======================================================
+Fecha: 22 de Junio de 2026
+
+A continuación se detalla paso a paso lo que se realizó 
+técnicamente para hacer posible este Sistema de 
+Universidad Transaccional:
+
+1. CONFIGURACIÓN DEL ENTORNO
+-------------------------------------------------------
+- Se inicializó un proyecto en Node.js (npm init).
+- Se instaló Express.js para la creación del servidor y 
+  la API REST.
+- Se implementó Prisma ORM como capa de abstracción para 
+  el manejo seguro y tipado de la base de datos PostgreSQL.
+- Se configuraron los middlewares de Express para poder 
+  procesar y desestructurar automáticamente el formato JSON 
+  en el `req.body`.
+
+2. DISEÑO DE LA BASE DE DATOS Y ESQUEMA
+-------------------------------------------------------
+- Se creó el archivo `schema.prisma` mapeando fielmente las 
+  tablas requeridas (Carrera, Materia, Ciclo, Estudiante, 
+  Matricula, Lugar, AsignacionLugar).
+- Se establecieron relaciones de clave foránea en cascada 
+  (ON DELETE CASCADE) para mantener la integridad referencial.
+- Se configuró el archivo `.env` apuntando al motor PostgreSQL 
+  local manejado por pgAdmin.
+
+3. DESARROLLO DE PETICIONES Y REGLAS DE NEGOCIO
+-------------------------------------------------------
+Se programaron las rutas de la API respetando exactamente 
+los nombres y reglas literales de la rúbrica:
+- Petición 1: Endpoint POST que recibe `carrera` y `materias` 
+  por el body, desestructura el objeto y guarda los registros.
+- Petición 2: Endpoint POST que valida dinámicamente si la 
+  carrera existe en BD antes de avanzar, y simula la 
+  existencia de estudiantes y matrículas activas.
+- Petición 3: Endpoint POST que valida todas las reglas 
+  estrictas juntas (ciclo existente y activo, matrículas 
+  activas, materia existente) para aprobar la asignación de 
+  un laboratorio.
+
+4. IMPLEMENTACIÓN TRANSACCIONAL (ACID)
+-------------------------------------------------------
+Para cumplir con el requerimiento de "Sistema Transaccional":
+- Se usaron "Nested Writes" de Prisma (Petición 1 y 3) para 
+  garantizar inserciones atómicas sin dejar datos sueltos.
+- Se implementó `prisma.$transaction` de forma interactiva 
+  en la Petición 2, englobando la creación del ciclo, del 
+  estudiante y de su matrícula en un solo bloque cerrado. 
+  Si algo falla, ocurre un "Rollback" completo.
+
+5. CONTROL DE VERSIONES
+-------------------------------------------------------
+- Se implementó Git local y se agregó un `.gitignore` para 
+  no subir la carpeta `node_modules` ni variables secretas.
+- Se conectó el repositorio local con GitHub y se realizó un 
+  Push a la rama 'main' del repositorio 'univesity_week'.
