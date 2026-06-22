@@ -54,28 +54,36 @@ app.post('/api/peticion2', async (req, res) => {
       return res.status(404).json({ error: 'Validación fallida: La carrera no existe en la base de datos' });
     }
 
-    // Creamos el ciclo
-    const nuevoCiclo = await prisma.ciclo.create({
-      data: {
-        nombre: Ciclo,
-        estado: status || 'activo',
-        carreraId: carreraExiste.id,
-      }
-    });
+    // ==========================================
+    // EJECUCIÓN TRANSACCIONAL (ACID)
+    // ==========================================
+    // Usamos prisma.$transaction para garantizar que el ciclo, el estudiante y 
+    // la matrícula se guarden como una única "Transacción". Si una falla, todo se revierte.
+    const { nuevoCiclo, estudiante } = await prisma.$transaction(async (tx) => {
+      // 1. Creamos el ciclo
+      const cicloTx = await tx.ciclo.create({
+        data: {
+          nombre: Ciclo,
+          estado: status || 'activo',
+          carreraId: carreraExiste.id,
+        }
+      });
 
-    // REGLA: "estudiantes=existen, matriculas=activas"
-    // Para satisfacer la regla en la práctica, creamos un estudiante y lo matriculamos activo
-    const estudiante = await prisma.estudiante.create({
-      data: {
-        nombre: 'Estudiante Prueba',
-        email: `prueba_${Date.now()}@test.com`,
-        matriculas: {
-          create: {
-            cicloId: nuevoCiclo.id,
-            estado: 'activa' // Cumple "matriculas=activas"
+      // 2. REGLA: "estudiantes=existen, matriculas=activas"
+      const estudianteTx = await tx.estudiante.create({
+        data: {
+          nombre: 'Estudiante Prueba',
+          email: `prueba_${Date.now()}@test.com`,
+          matriculas: {
+            create: {
+              cicloId: cicloTx.id,
+              estado: 'activa' // Cumple "matriculas=activas"
+            }
           }
         }
-      }
+      });
+
+      return { nuevoCiclo: cicloTx, estudiante: estudianteTx };
     });
 
     res.status(201).json({
