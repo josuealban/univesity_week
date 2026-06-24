@@ -1,0 +1,133 @@
+{
+  "info": {
+    "_postman_id": "sist-universidad-2026",
+    "name": "Sistema Universidad - API",
+    "description": "Colección de las 3 peticiones del sistema universitario.\n\n**Flujo correcto:**\n1. Ejecutar Petición 1 → copia el `carreraId` y `materiaId` de la respuesta.\n2. Ejecutar Petición 2 → usa el `carreraId`, copia el `cicloId` de la respuesta.\n3. Ejecutar Petición 3 → usa `cicloId` y `materiaId`.\n\nO usa la colección con variables de entorno (ver Environment adjunto).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Peticion 1 - Crear Carrera + Materias",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "if (json.data) {",
+              "  pm.environment.set('carreraId', json.data.id);",
+              "  pm.environment.set('materiaId', json.data.materias[0].id);",
+              "  console.log('carreraId guardado:', json.data.id);",
+              "  console.log('materiaId guardado:', json.data.materias[0].id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"carrera\": \"Desarrollo de Software\",\n  \"materias\": \"Programacion 1, Programacion 2, Base de datos\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/peticion1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "peticion1"]
+        },
+        "description": "Crea la carrera 'Desarrollo de Software' con 3 materias: Programacion 1, Programacion 2 y Base de datos.\n\nGuarda automáticamente `carreraId` y `materiaId` en las variables de entorno."
+      },
+      "response": []
+    },
+    {
+      "name": "Peticion 2 - Crear Ciclo + Validar Carrera + Matricula Activa",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const json = pm.response.json();",
+              "if (json.ciclo) {",
+              "  pm.environment.set('cicloId', json.ciclo.id);",
+              "  console.log('cicloId guardado:', json.ciclo.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"Ciclo\": \"2026-2027\",\n  \"status\": \"activo\",\n  \"carreraId\": {{carreraId}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/peticion2",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "peticion2"]
+        },
+        "description": "Crea el ciclo '2026-2027' en estado activo.\n\nValidaciones que realiza el backend:\n- La carrera referenciada existe en la BD.\n- Crea un estudiante y lo matricula en el ciclo (matrícula activa).\n\nUsa la variable `{{carreraId}}` guardada por la Petición 1.\nGuarda automáticamente `cicloId` en las variables de entorno."
+      },
+      "response": []
+    },
+    {
+      "name": "Peticion 3 - Asignar Laboratorio al Ciclo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombreLugar\": \"Laboratorio de Computacion\",\n  \"cicloId\": {{cicloId}},\n  \"materiaId\": {{materiaId}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/peticion3",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "peticion3"]
+        },
+        "description": "Crea y asigna el 'Laboratorio de Computacion' al ciclo activo y a la materia.\n\nValidaciones que realiza el backend:\n- El ciclo existe y está en estado 'activo'.\n- Existe al menos una matrícula activa en ese ciclo.\n- La materia existe en la BD.\n\nUsa las variables `{{cicloId}}` y `{{materiaId}}` guardadas por las peticiones anteriores."
+      },
+      "response": []
+    }
+  ],
+  "variable": []
+}
