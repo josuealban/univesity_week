@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from './prisma/prisma.module.js';
-import { ApiModule } from './api/api.module.js';
+import { PrismaModule } from './prisma/prisma.module';
+import { ApiModule } from './api/api.module';
 
 @Module({
   imports: [PrismaModule, ApiModule],
