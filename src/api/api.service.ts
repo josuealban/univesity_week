@@ -15,6 +15,19 @@ export class ApiService {
       throw new BadRequestException('Faltan datos (carrera o materias)');
     }
 
+    // Si ya existe la carrera con ese nombre, la recuperamos para no lanzar error de duplicado
+    const carreraExistente = await this.prisma.carrera.findUnique({
+      where: { nombre: carrera },
+      include: { materias: true },
+    });
+
+    if (carreraExistente) {
+      return {
+        message: 'Petición 1 exitosa: Carrera ya existente (recuperada)',
+        data: carreraExistente,
+      };
+    }
+
     const materiasArray = materias.split(',').map((m) => ({ nombre: m.trim() }));
 
     const nuevaCarrera = await this.prisma.carrera.create({
